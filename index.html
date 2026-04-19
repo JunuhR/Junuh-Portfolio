@@ -95,7 +95,7 @@
     display: grid;
     grid-template-columns: 1.4fr 1fr;
     gap: 80px;
-    align-items: end;
+    align-items: start;
   }
   .hero-meta {
     font-family: var(--mono);
@@ -139,20 +139,40 @@
     color: var(--accent);
     font-size: 0.72em;
   }
+  .hero-about-heading {
+    font-family: var(--serif);
+    font-size: clamp(36px, 4.5vw, 60px);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-top: 8px;
+    margin-bottom: 32px;
+  }
+  .hero-about-heading em { font-style: italic; color: var(--accent); }
   .hero-desc {
     font-size: 16px;
     line-height: 1.65;
     color: var(--ink-soft);
-    max-width: 420px;
-    padding-bottom: 16px;
+    max-width: 440px;
   }
+  .hero-desc p { margin-bottom: 1em; }
+  .hero-desc p:last-child { margin-bottom: 0; }
   .hero-desc-label {
     font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 0.2em;
     color: var(--ink-faint);
     text-transform: uppercase;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-desc-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--ink-faint);
   }
 
   .section-head {
@@ -428,7 +448,7 @@
     .nav-links { gap: 16px; font-size: 11px; }
     .hero { padding: 120px 0 60px; }
     .hero-inner { grid-template-columns: 1fr; gap: 40px; }
-    .hero-desc { max-width: 100%; padding-bottom: 0; }
+    .hero-desc { max-width: 100%; }
     .section-head { padding: 60px 0 32px; flex-direction: column; gap: 12px; align-items: flex-start; }
     .project { grid-template-columns: 1fr; gap: 20px; padding: 32px 0; }
     .project:hover { padding: 32px 0; }
@@ -460,10 +480,12 @@
       </h1>
     </div>
     <div>
-      <div class="hero-desc-label">— About</div>
-      <p class="hero-desc">
-        Tulsa-based filmmaker, builder, and founder of Ridenour Media Firm. I work at the intersection of hardware, software, and visual storytelling.
-      </p>
+      <div class="hero-desc-label">About</div>
+      <h2 class="hero-about-heading">Who I <em>am.</em></h2>
+      <div class="hero-desc">
+        <p>I founded Ridenour Media Firm out of a passion for visual storytelling — and a specific strength in taking projects from start to finish, handling every part of the process myself. Planning, shooting, editing, delivery: one workflow, one point of contact.</p>
+        <p>That same instinct carries into my engineering work, which is where I spend most of my time now. I build hardware and software projects end-to-end — starting with the research and first-principles question, moving through CAD and circuit design, writing the firmware that runs on the board, fabricating the physical components on my printer, and iterating until it actually works. Right now that means Project WHISPR, a custom quadcopter with 3D-printed acoustic waveguides and an active noise cancellation system. Before that it was SolStation, a solar-powered charging station with its own data pipeline. The projects change; the approach doesn't.</p>
+      </div>
     </div>
   </div>
 </section>
