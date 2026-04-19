@@ -361,14 +361,11 @@ async function loadEntries() {
   }
 
   try {
-    // Browsers block direct fetches from Google Docs (CORS).
-    // Route through a public CORS proxy. allorigins.win returns JSON with the HTML inside.
-    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(DOC_URL);
+    // Route through Junuh's own Cloudflare Worker proxy (handles CORS reliably)
+    const proxyUrl = 'https://docs-proxy.junuhridenour0.workers.dev/?url=' + encodeURIComponent(DOC_URL);
     const response = await fetch(proxyUrl);
     if (!response.ok) throw new Error('Fetch failed: ' + response.status);
-    const json = await response.json();
-    const html = json.contents;
-    if (!html) throw new Error('Proxy returned empty content');
+    const html = await response.text();
 
     // Parse it
     const parser = new DOMParser();
