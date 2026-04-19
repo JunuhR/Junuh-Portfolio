@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project WHISPR — Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0c;
+    --ink: #f2efe8;
+    --ink-soft: #9a968d;
+    --ink-faint: #55524c;
+    --rule: #26251f;
+    --accent: #ff6b3d;
+    --card: #17171410;
+    --card-border: #26251f;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Inter Tight', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 48px;
+    position: relative;
+    z-index: 2;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s;
+  }
+  nav.scrolled { border-bottom-color: var(--rule); }
+  .logo {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo em { font-style: italic; color: var(--accent); }
+  .back-link {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  /* HEADER */
+  .cs-header {
+    padding: 140px 0 60px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 60px;
+  }
+  .cs-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cs-eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--ink-faint);
+  }
+  .cs-title {
+    font-family: var(--serif);
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .cs-title em { font-style: italic; color: var(--accent); }
+  .cs-subtitle {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 560px;
+  }
+  .cs-tags {
+    margin-top: 32px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .cs-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    color: var(--ink-soft);
+  }
+
+  /* ENTRIES - the chain of nodes */
+  .entries {
+    position: relative;
+    padding-left: 32px;
+  }
+  /* The thin vertical line tying entries together */
+  .entries::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--rule);
+  }
+
+  .entry {
+    position: relative;
+    padding-bottom: 60px;
+  }
+  .entry:last-child { padding-bottom: 0; }
+
+  /* The node/dot on the timeline */
+  .entry::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 12px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+  }
+
+  .entry-date {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .entry-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .entry-subtitle {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .entry-body {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .entry-body p { margin-bottom: 1em; }
+  .entry-body p:last-child { margin-bottom: 0; }
+  .entry-body strong { font-weight: 500; }
+  .entry-body em { font-style: italic; }
+  .entry-body a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 0.2s;
+  }
+  .entry-body a:hover { border-color: var(--accent); }
+  .entry-body ul, .entry-body ol {
+    margin: 0 0 1em 1.5em;
+  }
+  .entry-body li { margin-bottom: 0.4em; }
+  .entry-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--card-border);
+    margin: 16px 0;
+    display: block;
+  }
+
+  /* LOADING / ERROR / EMPTY states */
+  .state {
+    padding: 80px 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .state.error { color: var(--accent); }
+  .state a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+  .state code {
+    background: var(--card-border);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  /* FOOTER */
+  .cs-footer {
+    margin-top: 100px;
+    padding: 40px 0;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .cs-footer a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .cs-footer a:hover { color: var(--accent); }
+
+  @media (max-width: 700px) {
+    nav { padding: 16px 24px; }
+    .container { padding: 0 24px; }
+    .cs-header { padding: 100px 0 40px; margin-bottom: 40px; }
+    .entries { padding-left: 24px; }
+    .entry::before { left: -24px; }
+    .entries::before { left: 5px; }
+    .entry-title { font-size: 26px; }
+    .entry-body { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="index.html" class="logo">Junuh <em>Ridenour</em></a>
+  <a href="index.html" class="back-link">← All work</a>
+</nav>
+
+<main class="container">
+  <header class="cs-header">
+    <div class="cs-eyebrow">Case Study · 001</div>
+    <h1 class="cs-title">Project <em>WHISPR</em></h1>
+    <p class="cs-subtitle">
+      Active noise cancellation for quadcopter drones, starting with a 3D-printed acoustic waveguide. Ongoing build log.
+    </p>
+    <div class="cs-tags">
+      <span class="cs-tag">Hardware</span>
+      <span class="cs-tag">Acoustics</span>
+      <span class="cs-tag">3D Print</span>
+      <span class="cs-tag">Firmware</span>
+    </div>
+  </header>
+
+  <div class="entries" id="entries">
+    <div class="state" id="loading">Loading entries…</div>
+  </div>
+
+  <footer class="cs-footer">
+    <a href="index.html">← Back to all work</a>
+    <span>WHISPR · 2026</span>
+  </footer>
+</main>
+
+<script>
+/* ============================================================
+   GOOGLE DOCS BRIDGE — Project WHISPR
+   ============================================================
+   
+   SETUP:
+   1. Create a Google Doc for WHISPR entries
+   2. File → Share → Publish to web → Start publishing
+   3. Copy the URL it gives you (ends in /pub)
+   4. Paste it below as DOC_URL
+   5. Write entries in the doc using this format:
+   
+      Heading 1  → Entry title ("Shroud V1 Printed")
+      Heading 2  → Date or subtitle ("February 18, 2026")
+      Normal text → Body paragraphs
+      Images → Just paste them in the doc
+      
+   6. New entry at the top = newest first on the site
+   7. Edits to the doc show up on the site within ~5 minutes
+      (Google caches published docs briefly)
+   ============================================================ */
+
+const DOC_URL = 'https://docs.google.com/document/d/e/2PACX-1vRPNUzW3bZL6RQxvpA01c33DbVsz_atAI1sP7SPHqLwSIzhLSr6tNDFzeH4VphOfWtvlSLfbXaMJW0G/pub';
+
+async function loadEntries() {
+  const container = document.getElementById('entries');
+
+  // Not configured yet — show helpful placeholder
+  if (DOC_URL === 'PASTE_YOUR_PUBLISHED_GOOGLE_DOC_URL_HERE' || !DOC_URL) {
+    container.innerHTML = `
+      <div class="state">
+        <p><strong>Not yet connected to a Google Doc.</strong></p>
+        <p style="margin-top:12px;">To connect one:</p>
+        <p style="margin-top:8px;">1. Open your WHISPR Google Doc</p>
+        <p>2. <code>File → Share → Publish to web</code></p>
+        <p>3. Click <strong>Start publishing</strong></p>
+        <p>4. Copy the URL (ends in <code>/pub</code>)</p>
+        <p>5. Open <code>whispr.html</code>, paste URL into <code>DOC_URL</code></p>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    // Route through Junuh's own Cloudflare Worker proxy (handles CORS reliably)
+    const proxyUrl = 'https://docs-proxy.junuhridenour0.workers.dev/?url=' + encodeURIComponent(DOC_URL);
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error('Fetch failed: ' + response.status);
+    const html = await response.text();
+
+    // Parse it
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const content = doc.querySelector('#contents') || doc.body;
+
+    // Split into entries by H1 markers
+    const entries = parseEntries(content);
+
+    if (entries.length === 0) {
+      container.innerHTML = `
+        <div class="state">
+          <p><strong>No entries found.</strong></p>
+          <p style="margin-top:12px;">In your Google Doc, make sure you're using actual <strong>Heading 1</strong> style (the dropdown that says "Normal text" in the toolbar — change it to "Heading 1") for entry titles.</p>
+          <p style="margin-top:8px;">Just typing the words "Heading 1:" in normal text won't work — it needs to be the actual heading style.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Render
+    container.innerHTML = entries.map(renderEntry).join('');
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `
+      <div class="state error">
+        <p>Couldn't load entries.</p>
+        <p style="margin-top:12px; color:var(--ink-soft);">Make sure the Google Doc is <strong>published to web</strong> and the URL in <code>whispr.html</code> is correct.</p>
+        <p style="margin-top:8px; color:var(--ink-soft);">If this keeps failing, the CORS proxy might be down. Try refreshing, or contact Junuh.</p>
+      </div>
+    `;
+  }
+}
+
+function parseEntries(content) {
+  const entries = [];
+  const children = Array.from(content.children);
+
+  let current = null;
+
+  for (const el of children) {
+    // Google Docs wraps headings weirdly — check for H1 by looking at child spans' styles
+    // or by the tag itself
+    const isH1 = el.tagName === 'H1' || el.querySelector('h1');
+    const isH2 = el.tagName === 'H2' || el.querySelector('h2');
+
+    if (el.tagName === 'H1') {
+      // Start a new entry
+      if (current) entries.push(current);
+      current = {
+        title: cleanText(el.textContent),
+        subtitle: '',
+        bodyHtml: ''
+      };
+    } else if (el.tagName === 'H2' && current) {
+      current.subtitle = cleanText(el.textContent);
+    } else if (current) {
+      current.bodyHtml += cleanElement(el);
+    }
+  }
+
+  if (current) entries.push(current);
+
+  return entries;
+}
+
+function cleanText(s) {
+  return (s || '').replace(/\s+/g, ' ').trim();
+}
+
+/* Keep only safe HTML and strip Google's inline styles */
+function cleanElement(el) {
+  const allowedTags = ['P', 'UL', 'OL', 'LI', 'STRONG', 'EM', 'B', 'I', 'A', 'BR', 'IMG', 'H3', 'H4', 'BLOCKQUOTE'];
+  const clone = el.cloneNode(true);
+
+  // Remove all styles and classes
+  const all = clone.querySelectorAll('*');
+  [clone, ...all].forEach(node => {
+    if (node.nodeType !== 1) return;
+    node.removeAttribute('style');
+    node.removeAttribute('class');
+    node.removeAttribute('id');
+    // Keep href on links and src on images
+    if (node.tagName === 'A') {
+      const href = node.getAttribute('href') || '';
+      // Google wraps external links in their redirector — unwrap it
+      const match = href.match(/[?&]q=([^&]+)/);
+      if (match) node.setAttribute('href', decodeURIComponent(match[1]));
+    }
+    if (node.tagName === 'IMG') {
+      // Keep src only
+      const src = node.getAttribute('src');
+      [...node.attributes].forEach(a => node.removeAttribute(a.name));
+      if (src) node.setAttribute('src', src);
+    }
+  });
+
+  // Replace disallowed tags with spans or remove them, but keep content
+  const outerHTML = clone.outerHTML || '';
+  return outerHTML;
+}
+
+function renderEntry(entry) {
+  return `
+    <article class="entry">
+      ${entry.subtitle ? `<div class="entry-date">${escapeHtml(entry.subtitle)}</div>` : ''}
+      <h2 class="entry-title">${escapeHtml(entry.title)}</h2>
+      <div class="entry-body">${entry.bodyHtml}</div>
+    </article>
+  `;
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Nav scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+loadEntries();
+</script>
+
+</body>
+</html>
